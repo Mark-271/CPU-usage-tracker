@@ -5,7 +5,8 @@ CPPFLAGS := -Iinclude -MD
 CFLAGS	:= -Wall -Wextra -O2 -g
 OBJS	:=		\
 	  src/main.o	\
-	  src/file.o
+	  src/file.o	\
+	  src/tools.o
 
 # Be silent by default, 'make V=1' shows all compiler calls
 ifneq ($(V), 1)
