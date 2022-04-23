@@ -3,9 +3,10 @@ CC	:= gcc
 LD	:= gcc
 CPPFLAGS := -Iinclude -MD
 CFLAGS	:= -Wall -Wextra -O2 -g
-OBJS	:=		\
-	  src/main.o	\
-	  src/file.o	\
+OBJS	:=			\
+	  src/cpu_monitor.o	\
+	  src/file.o		\
+	  src/main.o		\
 	  src/tools.o
 
 # Be silent by default, 'make V=1' shows all compiler calls
