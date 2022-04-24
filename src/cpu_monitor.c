@@ -75,6 +75,7 @@ int cpu_monitor_read_data(const char *path)
 			     &buf[i].irq, &buf[i].softirq, &buf[i].steal);
 	}
 	free(line);
+	fclose(f);
 
 	st.cpu_num = n;
 	st.cs = buf;
@@ -82,7 +83,8 @@ int cpu_monitor_read_data(const char *path)
 	return 0;
 
 err_getline:
-	free(line);
 	perror("getline error\n");
+	free(line);
+	fclose(f);
 	return err;
 }
