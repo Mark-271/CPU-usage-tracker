@@ -7,8 +7,28 @@
 #include <string.h>
 #include <sys/sysinfo.h>
 
+/* CPU core usage data */
+struct  core_stat {
+	char name[5];
+	unsigned long user;
+	unsigned long nice;
+	unsigned long system;
+	unsigned long idle;
+	unsigned long iowait;
+	unsigned long irq;
+	unsigned long softirq;
+	unsigned long steal;
+};
+
+struct cpu_stat {
+	/* The number of cpu cores both physical and virtual */
+	size_t cpu_num;
+	struct core_stat *cs;
+};
+
 /* Storage for statistical data obtained from CPU */
-struct cpu_stat st;
+static struct cpu_stat st; /* singleton */
+
 
 /**
  * Collect and parse raw data from the file pointed to by @ref path.
