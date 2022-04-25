@@ -165,13 +165,15 @@ int cpu_monitor_init(void)
 
 	st.perc = (long double *)malloc(st.cpu_num * sizeof(long double));
 	if (!st.perc) {
-		free(st.prev);
 		free(st.cs);
+		free(st.prev);
 		goto err_malloc;
 	}
 
+	return 0;
+
 err_malloc:
-	perror("malloc error!!!!\n");
+	perror("malloc error\n");
 	ret = -1;
 	return ret;
 }

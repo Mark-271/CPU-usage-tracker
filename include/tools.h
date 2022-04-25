@@ -5,5 +5,6 @@
 #define ARRAY_SIZE(a)	(sizeof(a) / sizeof(a[0]))
 
 void msleep(unsigned long msec);
+void clear_screen(void);
 
 #endif /* TOOLS_H */
