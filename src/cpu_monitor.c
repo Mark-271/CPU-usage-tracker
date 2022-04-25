@@ -147,8 +147,6 @@ err_getline:
 
 int cpu_monitor_init(void)
 {
-	int ret = 0;
-
 	st.path = "/proc/stat";
 	st.cpu_num = (size_t)get_nprocs_conf() + 1;
 
@@ -174,8 +172,7 @@ int cpu_monitor_init(void)
 
 err_malloc:
 	perror("malloc error\n");
-	ret = -1;
-	return ret;
+	return -1;
 }
 
 void cpu_monitor_exit(void)
