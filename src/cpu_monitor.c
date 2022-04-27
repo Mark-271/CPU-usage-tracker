@@ -1,5 +1,6 @@
 #include <cpu_monitor.h>
 #include <file.h>
+#include <common.h>
 #include <tools.h>
 #include <stdio.h>
 #include <errno.h>
