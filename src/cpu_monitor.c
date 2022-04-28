@@ -100,6 +100,35 @@ void cpu_monitor_analyze_data(void)
 	counter++;
 }
 
+static void print_perc(char *name, long double perc)
+{
+	long double average = perc / 5;
+	char *colour;
+
+	if (average > 70)
+		colour = RED;
+	else if (average < 30)
+		colour = GRN;
+	else
+		colour = YEL;
+	if ((strcmp(name, "cpu")) == 0)
+		printf(UWHT "TOTAL:\t" RST "%s %.1Lf%%" RST "\n",colour, average);
+	else
+		printf("%s:\t%s %.1Lf%%" RST "\n", name, colour, average);
+}
+
+void cpu_monitor_print_res(void)
+{
+	if (st.print_ready) {
+		clear_screen();
+		for (size_t i = 0; i < st.cpu_num; i++) {
+			print_perc(st.prev[i].name, st.perc[i]);
+			st.perc[i] = 0;
+		}
+		st.print_ready = false;
+	}
+}
+
 /**
  * Collect and parse raw data from the file pointed to by @ref path.
  *
