@@ -21,6 +21,7 @@ struct  core_stat {
 };
 
 struct cpu_stat {
+	const char *path;
 	/* The number of cpu cores both physical and virtual */
 	size_t cpu_num;
 	struct core_stat *cs;
@@ -35,50 +36,37 @@ static struct cpu_stat st; /* singleton */
  *
  * Caller must free allocated buffer.
  *
- * @param path Path to the file '/proc/stat'
  * @return 0 on success or -1 on error
  */
-int cpu_monitor_read_data(const char *path)
+int cpu_monitor_read_data(void)
 {
 	FILE *f;
 	char *line = NULL;
-	size_t n;
 	size_t len = 0;
-	struct core_stat *buf;
 	int err = -1;
 
-	if (!file_exist(path)) {
+	if (!file_exist(st.path)) {
 			printf("Error: Incorrect path to file\n");
 			return err;
 	}
 
-	n = (size_t)get_nprocs_conf() + 1;
-	buf = (struct core_stat *)malloc(n * sizeof(struct core_stat));
-	if (!buf) {
-		perror("malloc error\n");
-		return err;
-	}
-
-	f = fopen(path, "r");
+	f = fopen(st.path, "r");
 	if (!f) {
 		perror("fopen error\n");
 		return err;
 	}
 
-	for (size_t i = 0; i < n; i++) {
+	for (size_t i = 0; i < st.cpu_num; i++) {
 		if (getline(&line, &len, f) < 0)
 			goto err_getline;
 
 		sscanf(line, "%s %ld %ld %ld %ld %ld %ld %ld %ld",
-			     buf[i].name, &buf[i].user, &buf[i].nice,
-			     &buf[i].system, &buf[i].idle, &buf[i].iowait,
-			     &buf[i].irq, &buf[i].softirq, &buf[i].steal);
+			     st.cs[i].name, &st.cs[i].user, &st.cs[i].nice,
+			     &st.cs[i].system, &st.cs[i].idle, &st.cs[i].iowait,
+			     &st.cs[i].irq, &st.cs[i].softirq, &st.cs[i].steal);
 	}
 	free(line);
 	fclose(f);
-
-	st.cpu_num = n;
-	st.cs = buf;
 
 	return 0;
 
@@ -87,4 +75,29 @@ err_getline:
 	free(line);
 	fclose(f);
 	return err;
+}
+
+int cpu_monitor_init(void)
+{
+	int ret = 0;
+
+	st.path = "/proc/stat";
+	st.cpu_num = (size_t)get_nprocs_conf() + 1;
+
+	st.cs = (struct core_stat *)malloc(st.cpu_num * sizeof(struct core_stat));
+	if (!st.cs) {
+		perror("malloc error\n");
+		ret = -1;
+	}
+
+	return ret;
+}
+
+void cpu_monitor_exit(void)
+{
+	st.path = NULL;
+	st.cpu_num = 0;
+
+	free(st.cs);
+	UNUSED(st);
 }
