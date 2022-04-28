@@ -20,16 +20,15 @@ static void sig_handler(int signum)
 
 int main(void)
 {
-	const char *path = "/proc/stat";
 	cpu_monitor_init();
 
 	while(1) {
 		if (signal(SIGINT, sig_handler) == SIG_ERR)
 			fprintf(stderr, "Warning: Can't catch SIGINT\n");
-		clear_screen();
-		cpu_monitor_read_data(path);
+		cpu_monitor_read_data();
 		cpu_monitor_analyze_data();
-		sleep(1);
+		cpu_monitor_print_res();
+		msleep(200);
 	}
 
 	return EXIT_SUCCESS;
