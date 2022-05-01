@@ -2,7 +2,8 @@ APP	:= ptrack
 CC	:= gcc
 LD	:= gcc
 CPPFLAGS := -Iinclude -MD
-CFLAGS	:= -Wall -Wextra -O2 -g
+CFLAGS	:= -Wall -Wextra -O2 -g -pthread
+LDLIBS	:= -pthread
 OBJS	:=			\
 	  src/cpu_monitor.o	\
 	  src/file.o		\
@@ -20,7 +21,7 @@ all: $(APP)
 
 $(APP): $(OBJS)
 	@printf "  LD    $@\n"
-	$(Q)$(LD) $(LDFLAGS) $(OBJS) -o $(APP)
+	$(Q)$(LD) $(LDFLAGS) $(OBJS) -o $(APP) $(LDLIBS)
 
 %.o: %.c
 	@printf "  CC    $(*).c\n"

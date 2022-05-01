@@ -1,4 +1,5 @@
 #include <cpu_monitor.h>
+#include <threads.h>
 #include <file.h>
 #include <common.h>
 #include <tools.h>
@@ -37,6 +38,7 @@ struct cpu_stat {
 	struct cpu_usage *prev;
 	long double *perc;
 	bool print_ready;
+	bool analyze_ready;
 };
 
 /* Storage for statistical data obtained from CPU */
@@ -46,11 +48,13 @@ static struct cpu_usage get_cpu_usage(struct core_stat obj)
 {
 	struct cpu_usage c;
 
+	pthread_mutex_lock(&lock);
 	strncpy(c.name, obj.name, sizeof(obj.name));
 	c.name[sizeof(c.name) - 1] = '\0';
 	c.idletime = obj.idle + obj.iowait;
 	c.worktime = obj.user + obj.nice + obj.system +
 		    obj.irq + obj.softirq + obj.steal;
+	pthread_mutex_unlock(&lock);
 
 	return c;
 }
@@ -74,8 +78,11 @@ static long double get_cpuusage_delta(struct cpu_usage prev, struct cpu_usage cu
 	unsigned long long totaltime;
 	long double res;
 
+	pthread_mutex_lock(&lock);
 	workingtime = cur. worktime - prev.worktime;
 	totaltime = workingtime + (cur.idletime - prev.idletime);
+	pthread_mutex_unlock(&lock);
+
 	res = (long double)workingtime / totaltime * 100.0L;
 
 	return res;
@@ -86,18 +93,30 @@ void cpu_monitor_analyze_data(void)
 	struct cpu_usage cur[st.cpu_num];
 	static size_t counter;
 
-	if (counter == 5) {
-		st.print_ready = true;
-		counter = 0;
-		return;
-	}
+	if (st.analyze_ready) {
 
-	for (size_t i = 0; i < st.cpu_num; i++) {
-		cur[i] = get_cpu_usage(st.cs[i]);
-		st.perc[i] += get_cpuusage_delta(st.prev[i], cur[i]);
-		st.prev[i] = cur[i];
+		pthread_mutex_lock(&lock);
+		st.analyze_ready = false;
+		pthread_mutex_unlock(&lock);
+
+		if (counter == 5) {
+			pthread_mutex_lock(&lock);
+			st.print_ready = true;
+			pthread_mutex_unlock(&lock);
+			counter = 0;
+			return;
+		}
+
+		for (size_t i = 0; i < st.cpu_num; i++) {
+			cur[i] = get_cpu_usage(st.cs[i]);
+			st.perc[i] += get_cpuusage_delta(st.prev[i], cur[i]);
+			pthread_mutex_lock(&lock);
+			st.prev[i] = cur[i];
+			pthread_mutex_unlock(&lock);
+		}
+
+		counter++;
 	}
-	counter++;
 }
 
 static void print_perc(char *name, long double perc)
@@ -120,12 +139,19 @@ static void print_perc(char *name, long double perc)
 void cpu_monitor_print_res(void)
 {
 	if (st.print_ready) {
+
+		pthread_mutex_lock(&lock);
+		st.print_ready = false;
+		pthread_mutex_unlock(&lock);
+
 		clear_screen();
+
+		pthread_mutex_lock(&condlock);
 		for (size_t i = 0; i < st.cpu_num; i++) {
 			print_perc(st.prev[i].name, st.perc[i]);
 			st.perc[i] = 0;
 		}
-		st.print_ready = false;
+		pthread_mutex_unlock(&condlock);
 	}
 }
 
@@ -158,13 +184,20 @@ int cpu_monitor_read_data(void)
 		if (getline(&line, &len, f) < 0)
 			goto err_getline;
 
+		pthread_mutex_lock(&lock);
 		sscanf(line, "%s %lld %lld %lld %lld %lld %lld %lld %lld",
 			     st.cs[i].name, &st.cs[i].user, &st.cs[i].nice,
 			     &st.cs[i].system, &st.cs[i].idle, &st.cs[i].iowait,
 			     &st.cs[i].irq, &st.cs[i].softirq, &st.cs[i].steal);
+		pthread_mutex_unlock(&lock);
 	}
+
 	free(line);
 	fclose(f);
+
+	pthread_mutex_lock(&lock);
+	st.analyze_ready = true;
+	pthread_mutex_unlock(&lock);
 
 	return 0;
 
