@@ -230,6 +230,7 @@ int cpu_monitor_init(void)
 		free(st.prev);
 		goto err_malloc;
 	}
+	memset(st.perc, 0, st.cpu_num * sizeof(long double));
 
 	return 0;
 
