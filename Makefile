@@ -31,6 +31,7 @@ clean:
 	@printf "  CLEAN\n"
 	$(Q)-rm -f $(APP)
 	$(Q)-rm -f $(OBJS)
+	$(Q)find src/ -name '*.d' -exec rm -f {} \;
 
 .PHONY: all clean
 
