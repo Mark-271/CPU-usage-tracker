@@ -19,11 +19,27 @@ pthread_cond_t cond_ids[THR_NUM - 1];
 pthread_mutex_t lock;
 pthread_mutex_t condlock;
 
+static void thread_sig_mask(void)
+{
+	int err;
+	sigset_t set;
+
+	sigemptyset(&set);
+	sigaddset(&set, SIGINT);
+
+	err = pthread_sigmask(SIG_BLOCK, &set, NULL);
+	if (err != 0)
+		printf("Warning: Can't unable sigmask\n");
+}
+
+
 static void *thread_reader_func(void *data)
 {
-	UNUSED(data);
 	int err;
-	/* TODO: function to block some signals */
+
+	UNUSED(data);
+	thread_sig_mask();
+
 	for (;;) {
 		err = cpu_monitor_read_data();
 		if (err) {
@@ -41,7 +57,8 @@ static void *thread_reader_func(void *data)
 static void *thread_analyzer_func(void *data)
 {
 	UNUSED(data);
-	/* TODO: function to block some signals */
+	thread_sig_mask();
+
 	for (;;) {
 		pthread_mutex_lock(&condlock);
 		pthread_cond_wait(&cond_ids[0], &condlock);
@@ -57,7 +74,8 @@ static void *thread_analyzer_func(void *data)
 static void *thread_printer_func(void *data)
 {
 	UNUSED(data);
-	/* TODO: function to block some signals */
+	thread_sig_mask();
+
 	for (;;) {
 		pthread_mutex_lock(&condlock);
 		pthread_cond_wait(&cond_ids[1], &condlock);
