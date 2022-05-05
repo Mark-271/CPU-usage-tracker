@@ -2,13 +2,23 @@ APP	:= ptrack
 CC	:= gcc
 LD	:= gcc
 CPPFLAGS := -Iinclude -MD
-CFLAGS	:= -Wall -Wextra -O2 -g -pthread
+CFLAGS	:= -Wall -Wextra -O2 -pthread
 LDLIBS	:= -pthread
 OBJS	:=			\
 	  src/cpu_monitor.o	\
 	  src/file.o		\
 	  src/main.o		\
 	  src/tools.o
+
+BUILD	?= debug
+ifeq ($(BUILD), release)
+  CPPFLAGS += -DNDEBUG
+  CFLAGS += -s
+else ifeq ($(BUILD), debug)
+  CFLAGS += -g
+else
+  $(error Incorrect BUILD variable)
+endif
 
 # Be silent by default, 'make V=1' shows all compiler calls
 ifneq ($(V), 1)
