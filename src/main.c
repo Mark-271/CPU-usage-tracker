@@ -18,6 +18,7 @@ pthread_t thr_ids[THR_NUM];
 pthread_cond_t cond_ids[THR_NUM - 1];
 pthread_mutex_t lock;
 pthread_mutex_t condlock;
+static bool thr_cancel;
 
 static void thread_sig_mask(void)
 {
@@ -41,6 +42,11 @@ static void *thread_reader_func(void *data)
 	thread_sig_mask();
 
 	for (;;) {
+		if (thr_cancel) {
+			pthread_cond_signal(&cond_ids[0]);
+			break;
+		}
+
 		err = cpu_monitor_read_data();
 		if (err) {
 			printf("Error: thread_reader error\n");
@@ -64,6 +70,11 @@ static void *thread_analyzer_func(void *data)
 		pthread_cond_wait(&cond_ids[0], &condlock);
 		pthread_mutex_unlock(&condlock);
 
+		if (thr_cancel) {
+			pthread_cond_signal(&cond_ids[1]);
+			break;
+		}
+
 		cpu_monitor_analyze_data();
 		pthread_cond_signal(&cond_ids[1]);
 	}
@@ -81,18 +92,28 @@ static void *thread_printer_func(void *data)
 		pthread_cond_wait(&cond_ids[1], &condlock);
 		pthread_mutex_unlock(&condlock);
 
+		if (thr_cancel)
+			break;
+
 		cpu_monitor_print_res();
 	}
 
 	return NULL;
 }
 
+static void destroy_mutex(void)
+{
+	for(size_t i = 0; i < THR_NUM - 1; ++i)
+		pthread_cond_destroy(&cond_ids[i]);
+	pthread_mutex_destroy(&condlock);
+	pthread_mutex_destroy(&lock);
+}
+
 static void sig_handler(int signum)
 {
 	if (signum == SIGINT) {
+		thr_cancel = true;
 		printf("Bye!\n");
-		cpu_monitor_exit();
-		exit(EXIT_SIGNAL + signum);
 	}
 }
 
@@ -142,10 +163,7 @@ int main(void)
 	}
 
 exit:
-	for(i = 0; i < THR_NUM - 1; ++i)
-		pthread_cond_destroy(&cond_ids[i]);
+	destroy_mutex();
 	cpu_monitor_exit();
-	pthread_mutex_destroy(&condlock);
-	pthread_mutex_destroy(&lock);
 	return ret;
 }
