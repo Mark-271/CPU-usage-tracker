@@ -1,6 +1,7 @@
 #include <cpu_monitor.h>
 #include <file.h>
 #include <common.h>
+#include <pthread.h>
 #include <tools.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,16 +9,15 @@
 #include <signal.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <threads.h>
 
 typedef void *(*thread_func_t) (void *);
 
+#define THR_NUM		3
 #define EXIT_SIGNAL	128 /* terminated by signal */
 
-pthread_t thr_ids[THR_NUM];
-pthread_cond_t cond_ids[THR_NUM - 1];
-pthread_mutex_t lock;
-pthread_mutex_t condlock;
+static pthread_t thr_ids[THR_NUM];
+static pthread_cond_t cond_ids[THR_NUM - 1];
+static pthread_mutex_t condlock;
 static bool thr_cancel; /* Flag indicating that all threads should exit */
 
 /* Set mask for blocked signals */
@@ -106,7 +106,6 @@ static void destroy_mutex(void)
 	for(size_t i = 0; i < THR_NUM - 1; ++i)
 		pthread_cond_destroy(&cond_ids[i]);
 	pthread_mutex_destroy(&condlock);
-	pthread_mutex_destroy(&lock);
 }
 
 /*
@@ -135,7 +134,6 @@ int main(void)
 	if (signal(SIGINT, sig_handler) == SIG_ERR)
 		fprintf(stderr, "Warning: Can't catch SIGINT\n");
 
-	pthread_mutex_init(&lock, NULL);
 	pthread_mutex_init(&condlock, NULL);
 
 	for (i = 0; i < THR_NUM - 1; ++i)

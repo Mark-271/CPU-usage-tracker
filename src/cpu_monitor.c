@@ -1,7 +1,7 @@
 #include <cpu_monitor.h>
-#include <threads.h>
 #include <file.h>
 #include <common.h>
+#include <pthread.h>
 #include <tools.h>
 #include <stdio.h>
 #include <errno.h>
@@ -11,6 +11,8 @@
 #include <stdbool.h>
 
 #define CPU_SAMPLING_NUM	(1000 / CPU_SAMPLING_DELAY)
+
+static pthread_mutex_t lock;
 
 /* CPU core usage data */
 struct  core_stat {
@@ -206,6 +208,8 @@ int cpu_monitor_init(void)
 	st.path = "/proc/stat";
 	st.cpu_num = (size_t)get_nprocs_conf() + 1;
 
+	pthread_mutex_init(&lock, NULL);
+
 	st.cs = (struct core_stat *)malloc(st.cpu_num *
 					   sizeof(struct core_stat));
 	if (!st.cs) {
@@ -238,6 +242,8 @@ void cpu_monitor_exit(void)
 {
 	st.path = NULL;
 	st.cpu_num = 0;
+
+	pthread_mutex_destroy(&lock);
 
 	free(st.cs);
 	free(st.prev);
