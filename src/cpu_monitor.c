@@ -141,12 +141,12 @@ void cpu_monitor_print_res(void)
 
 		clear_screen();
 
-		pthread_mutex_lock(&condlock);
+		pthread_mutex_lock(&lock);
 		for (size_t i = 0; i < st.cpu_num; i++) {
 			print_perc(st.prev[i].name, st.perc[i]);
 			st.perc[i] = 0;
 		}
-		pthread_mutex_unlock(&condlock);
+		pthread_mutex_unlock(&lock);
 	}
 }
 
