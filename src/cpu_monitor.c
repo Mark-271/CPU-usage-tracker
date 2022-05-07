@@ -10,6 +10,8 @@
 #include <sys/sysinfo.h>
 #include <stdbool.h>
 
+#define CPU_SAMPLING_NUM	(1000 / CPU_SAMPLING_DELAY)
+
 /* CPU core usage data */
 struct  core_stat {
 	char name[5];
@@ -106,7 +108,7 @@ void cpu_monitor_analyze_data(void)
 		st.analyze_ready = false;
 		pthread_mutex_unlock(&lock);
 
-		if (counter == 5) {
+		if (counter == CPU_SAMPLING_NUM) {
 			pthread_mutex_lock(&lock);
 			st.print_ready = true;
 			pthread_mutex_unlock(&lock);

@@ -54,7 +54,7 @@ static void *thread_reader_func(void *data)
 		}
 		pthread_cond_signal(&cond_ids[0]);
 
-		msleep(THR_READER_DELAY);
+		msleep(CPU_SAMPLING_DELAY);
 	}
 
 	return NULL;
