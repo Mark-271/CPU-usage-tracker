@@ -101,7 +101,7 @@ static void *thread_printer_func(void *data)
 	return NULL;
 }
 
-static void destroy_mutex(void)
+static void destroy_cond(void)
 {
 	for(size_t i = 0; i < THR_NUM - 1; ++i)
 		pthread_cond_destroy(&cond_ids[i]);
@@ -165,7 +165,7 @@ int main(void)
 	}
 
 exit:
-	destroy_mutex();
+	destroy_cond();
 	cpu_monitor_exit();
 	return ret;
 }
