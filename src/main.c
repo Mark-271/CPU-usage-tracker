@@ -12,14 +12,15 @@
 
 typedef void *(*thread_func_t) (void *);
 
-#define EXIT_SIGNAL	128	/* terminated by signal */
+#define EXIT_SIGNAL	128 /* terminated by signal */
 
 pthread_t thr_ids[THR_NUM];
 pthread_cond_t cond_ids[THR_NUM - 1];
 pthread_mutex_t lock;
 pthread_mutex_t condlock;
-static bool thr_cancel;
+static bool thr_cancel; /* Flag indicating that all threads should exit */
 
+/* Set mask for blocked signals */
 static void thread_sig_mask(void)
 {
 	int err;
@@ -32,7 +33,6 @@ static void thread_sig_mask(void)
 	if (err != 0)
 		printf("Warning: Can't unable sigmask\n");
 }
-
 
 static void *thread_reader_func(void *data)
 {
@@ -109,6 +109,10 @@ static void destroy_mutex(void)
 	pthread_mutex_destroy(&lock);
 }
 
+/*
+ * When sig_handler is invoked, it sets the thr_cancel flag,
+ * forcing the pthread threads termination, which then are joint by main thread.
+ */
 static void sig_handler(int signum)
 {
 	if (signum == SIGINT) {

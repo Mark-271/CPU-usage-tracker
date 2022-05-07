@@ -41,7 +41,6 @@ struct cpu_stat {
 	bool analyze_ready;
 };
 
-/* Storage for statistical data obtained from CPU */
 static struct cpu_stat st; /* singleton */
 
 static struct cpu_usage get_cpu_usage(struct core_stat obj)
@@ -75,6 +74,27 @@ static long double get_cpuusage_delta(struct cpu_usage p, struct cpu_usage c)
 	return res;
 }
 
+static void print_perc(char *name, long double perc)
+{
+	long double average = perc / 5;
+	char *colour;
+
+	if (average > 70)
+		colour = RED;
+	else if (average < 30)
+		colour = GRN;
+	else
+		colour = YEL;
+	if ((strcmp(name, "cpu")) == 0)
+		printf(UWHT "TOTAL:\t" RST "%s %.1Lf%%" RST "\n",
+		       colour, average);
+	else
+		printf("%s:\t%s %.1Lf%%" RST "\n", name, colour, average);
+}
+
+/**
+ * Calculate and aggregate the CPU usage percentage.
+ */
 void cpu_monitor_analyze_data(void)
 {
 	struct cpu_usage cur[st.cpu_num];
@@ -106,24 +126,9 @@ void cpu_monitor_analyze_data(void)
 	}
 }
 
-static void print_perc(char *name, long double perc)
-{
-	long double average = perc / 5;
-	char *colour;
-
-	if (average > 70)
-		colour = RED;
-	else if (average < 30)
-		colour = GRN;
-	else
-		colour = YEL;
-	if ((strcmp(name, "cpu")) == 0)
-		printf(UWHT "TOTAL:\t" RST "%s %.1Lf%%" RST "\n",
-		       colour, average);
-	else
-		printf("%s:\t%s %.1Lf%%" RST "\n", name, colour, average);
-}
-
+/**
+ * Print out both the total and per core CPU load values.
+ */
 void cpu_monitor_print_res(void)
 {
 	if (st.print_ready) {
@@ -145,8 +150,6 @@ void cpu_monitor_print_res(void)
 
 /**
  * Collect and parse raw data from the file pointed to by @ref path.
- *
- * Caller must free allocated buffer.
  *
  * @return 0 on success or -1 on error
  */
