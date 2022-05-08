@@ -106,7 +106,7 @@ static void print_perc(char *name, long double perc)
  */
 void cpu_monitor_analyze_data(void)
 {
-	struct cpu_usage cur[st.cpu_num];
+	struct cpu_usage cur;
 	static size_t counter;
 
 	if (st.analyze_ready) {
@@ -124,10 +124,10 @@ void cpu_monitor_analyze_data(void)
 		}
 
 		for (size_t i = 0; i < st.cpu_num; i++) {
-			cur[i] = get_cpu_usage(st.cs[i]);
-			st.perc[i] += get_cpuusage_delta(st.prev[i], cur[i]);
+			cur = get_cpu_usage(st.cs[i]);
+			st.perc[i] += get_cpuusage_delta(st.prev[i], cur);
 			pthread_mutex_lock(&lock);
-			st.prev[i] = cur[i];
+			st.prev[i] = cur;
 			pthread_mutex_unlock(&lock);
 		}
 
