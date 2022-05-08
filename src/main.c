@@ -41,12 +41,11 @@ static void thread_sig_mask(void)
 
 static void *thread_reader_func(void *data)
 {
-	int err;
-
 	UNUSED(data);
 	thread_sig_mask();
 
 	for (;;) {
+		int err;
 		if (thr_cancel) {
 			pthread_cond_signal(&cond_ids[0]);
 			break;
