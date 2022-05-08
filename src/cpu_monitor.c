@@ -185,7 +185,7 @@ int cpu_monitor_read_data(void)
 			goto err_getline;
 
 		pthread_mutex_lock(&lock);
-		sscanf(line, "%s %lld %lld %lld %lld %lld %lld %lld %lld",
+		sscanf(line, "%5s %llu %llu %llu %llu %llu %llu %llu %llu",
 			     st.cs[i].name, &st.cs[i].user, &st.cs[i].nice,
 			     &st.cs[i].system, &st.cs[i].idle, &st.cs[i].iowait,
 			     &st.cs[i].irq, &st.cs[i].softirq, &st.cs[i].steal);
