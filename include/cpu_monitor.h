@@ -1,3 +1,8 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/*
+ * Author: Mark Sungurov <mark.sungurov@gmail.com>
+ */
+
 #ifndef CPU_MONITOR_H
 #define CPU_MONITOR_H
 

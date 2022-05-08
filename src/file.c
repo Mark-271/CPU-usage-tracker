@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * Author: Sam Protsenko <joe.skb7@gmail.com>
+ */
+
 #include <file.h>
 #include <errno.h>
 #include <stdio.h>

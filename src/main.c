@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+/*
+ * Author: Mark Sungurov <mark.sungurov@gmail.com>
+ */
+
 #include <cpu_monitor.h>
 #include <file.h>
 #include <common.h>
