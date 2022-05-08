@@ -59,28 +59,15 @@ static struct cpu_usage get_cpu_usage(struct core_stat obj)
 	return c;
 }
 
-static long double get_cpuusage_delta(struct cpu_usage prev, struct cpu_usage cur)
+static long double get_cpuusage_delta(struct cpu_usage p, struct cpu_usage c)
 {
-	/*
-	 * PrevIdle = previdle + previowait
-	 * Idle = idle + iowait
-	 * PrevNonIdle = prevuser + prevnice + prevsystem + previrq
-	 * 		 + prevsoftirq + prevsteal
-	 * NonIdle = user + nice + system + irq + softirq + steal
-	 *
-	 * PrevTotal = PrevIdle + PrevNonIdle 0
-	 * Total = Idle + NonIdle 3157173
-	 * totald = Total - PrevTotal 3157173
-	 * idled = Idle - PrevIdle 2723326
-	 * CPU_Percentage = (totald - idled)/totald
-	 */
 	unsigned long long workingtime;
 	unsigned long long totaltime;
 	long double res;
 
 	pthread_mutex_lock(&lock);
-	workingtime = cur. worktime - prev.worktime;
-	totaltime = workingtime + (cur.idletime - prev.idletime);
+	workingtime = c. worktime - p.worktime;
+	totaltime = workingtime + (c.idletime - p.idletime);
 	pthread_mutex_unlock(&lock);
 
 	res = (long double)workingtime / totaltime * 100.0L;
@@ -131,7 +118,8 @@ static void print_perc(char *name, long double perc)
 	else
 		colour = YEL;
 	if ((strcmp(name, "cpu")) == 0)
-		printf(UWHT "TOTAL:\t" RST "%s %.1Lf%%" RST "\n",colour, average);
+		printf(UWHT "TOTAL:\t" RST "%s %.1Lf%%" RST "\n",
+		       colour, average);
 	else
 		printf("%s:\t%s %.1Lf%%" RST "\n", name, colour, average);
 }
@@ -213,12 +201,14 @@ int cpu_monitor_init(void)
 	st.path = "/proc/stat";
 	st.cpu_num = (size_t)get_nprocs_conf() + 1;
 
-	st.cs = (struct core_stat *)malloc(st.cpu_num * sizeof(struct core_stat));
+	st.cs = (struct core_stat *)malloc(st.cpu_num *
+					   sizeof(struct core_stat));
 	if (!st.cs) {
 		goto err_malloc;
 	}
 
-	st.prev = (struct cpu_usage *)malloc(st.cpu_num * sizeof(struct cpu_usage));
+	st.prev = (struct cpu_usage *)malloc(st.cpu_num *
+					     sizeof(struct cpu_usage));
 	if (!st.prev) {
 		free(st.cs);
 		goto err_malloc;
