@@ -4,7 +4,6 @@ CFLAGS	:= -Wall -Wextra -O2 -pthread
 LDLIBS	:= -pthread
 OBJS	:=			\
 	  src/cpu_monitor.o	\
-	  src/file.o		\
 	  src/main.o		\
 	  src/tools.o
 

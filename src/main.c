@@ -4,7 +4,6 @@
  */
 
 #include <cpu_monitor.h>
-#include <file.h>
 #include <common.h>
 #include <pthread.h>
 #include <tools.h>

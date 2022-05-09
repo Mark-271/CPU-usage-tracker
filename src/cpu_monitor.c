@@ -4,7 +4,6 @@
  */
 
 #include <cpu_monitor.h>
-#include <file.h>
 #include <common.h>
 #include <pthread.h>
 #include <tools.h>
@@ -14,6 +13,7 @@
 #include <string.h>
 #include <sys/sysinfo.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #define CPU_SAMPLING_NUM	(1000 / CPU_SAMPLING_DELAY)
 
@@ -155,6 +155,11 @@ void cpu_monitor_print_res(void)
 		}
 		pthread_mutex_unlock(&lock);
 	}
+}
+
+static bool file_exist(const char *path)
+{
+	return access(path, F_OK) != -1;
 }
 
 /**
