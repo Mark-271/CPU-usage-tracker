@@ -3,9 +3,9 @@ CPPFLAGS := -Iinclude -MD
 CFLAGS	:= -Wall -Wextra -O2 -pthread
 LDLIBS	:= -pthread
 OBJS	:=			\
-	  src/cpu_monitor.o	\
 	  src/main.o		\
-	  src/tools.o
+	  src/tools.o		\
+	  src/tracker.o
 
 BUILD	?= debug
 ifeq ($(BUILD), release)

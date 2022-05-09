@@ -3,7 +3,7 @@
  * Author: Mark Sungurov <mark.sungurov@gmail.com>
  */
 
-#include <cpu_monitor.h>
+#include <tracker.h>
 #include <common.h>
 #include <pthread.h>
 #include <tools.h>
@@ -23,15 +23,15 @@ int main(void)
 	pthread_t thr_ids[THR_NUM];
 
 	thread_func_t thread_func[] = {
-		thread_reader_func,
-		thread_analyzer_func,
-		thread_printer_func
+		tracker_read,
+		tracker_analyze,
+		tracker_print
 	};
 
-	if (signal(SIGINT, sig_handler) == SIG_ERR)
+	if (signal(SIGINT, tracker_sig_handler) == SIG_ERR)
 		fprintf(stderr, "Warning: Can't catch SIGINT\n");
 
-	err = cpu_monitor_init();
+	err = tracker_init();
 	if (err) {
 		ret = EXIT_FAILURE;
 		goto exit;
@@ -57,6 +57,6 @@ int main(void)
 	}
 
 exit:
-	cpu_monitor_exit();
+	tracker_exit();
 	return ret;
 }

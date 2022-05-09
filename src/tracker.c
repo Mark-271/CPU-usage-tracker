@@ -3,7 +3,7 @@
  * Author: Mark Sungurov <mark.sungurov@gmail.com>
  */
 
-#include <cpu_monitor.h>
+#include <tracker.h>
 #include <common.h>
 #include <pthread.h>
 #include <tools.h>
@@ -109,7 +109,7 @@ static void print_perc(char *name, long double perc)
 /**
  * Calculate and aggregate the CPU usage percentage.
  */
-static void cpu_monitor_analyze_data(void)
+static void tracker_analyze_data(void)
 {
 	struct cpu_usage cur;
 	static size_t counter;
@@ -143,7 +143,7 @@ static void cpu_monitor_analyze_data(void)
 /**
  * Print out both the total and per core CPU load values.
  */
-static void cpu_monitor_print_res(void)
+static void tracker_print_res(void)
 {
 	if (st.print_ready) {
 
@@ -172,7 +172,7 @@ static bool file_exist(const char *path)
  *
  * @return 0 on success or -1 on error
  */
-static int cpu_monitor_read_data(void)
+static int tracker_read_data(void)
 {
 	FILE *f;
 	char *line = NULL;
@@ -241,7 +241,7 @@ static void thread_sig_mask(void)
  * @param data Pointer to user data
  * @return NULL
  */
-void *thread_printer_func(void *data)
+void *tracker_print(void *data)
 {
 	UNUSED(data);
 	thread_sig_mask();
@@ -254,7 +254,7 @@ void *thread_printer_func(void *data)
 		if (st.thr_cancel)
 			break;
 
-		cpu_monitor_print_res();
+		tracker_print_res();
 	}
 
 	return NULL;
@@ -268,7 +268,7 @@ void *thread_printer_func(void *data)
  * @param data Pointer to user data
  * @return NULL
  */
-void *thread_analyzer_func(void *data)
+void *tracker_analyze(void *data)
 {
 	UNUSED(data);
 	thread_sig_mask();
@@ -283,7 +283,7 @@ void *thread_analyzer_func(void *data)
 			break;
 		}
 
-		cpu_monitor_analyze_data();
+		tracker_analyze_data();
 		pthread_cond_signal(&st.cond_print);
 	}
 
@@ -293,13 +293,13 @@ void *thread_analyzer_func(void *data)
 /**
  * Thread 'Reader' function.
  *
- * Used to get and parse data from /proc/stat every 200 ms.
+ * Used to get and parse data from /proc/st.t every 200 ms.
  * Should be passed to pthread_create()
  *
  * @param data Pointer to user data
  * @return NULL
  */
-void *thread_reader_func(void *data)
+void *tracker_read(void *data)
 {
 	UNUSED(data);
 	thread_sig_mask();
@@ -311,7 +311,7 @@ void *thread_reader_func(void *data)
 			break;
 		}
 
-		err = cpu_monitor_read_data();
+		err = tracker_read_data();
 		if (err) {
 			printf("Error: thread_reader error\n");
 			break;
@@ -331,7 +331,7 @@ void *thread_reader_func(void *data)
  *
  * @param signum The signal number
  */
-void sig_handler(int signum)
+void tracker_sig_handler(int signum)
 {
 	if (signum == SIGINT) {
 		st.thr_cancel = true;
@@ -339,7 +339,7 @@ void sig_handler(int signum)
 	}
 }
 
-int cpu_monitor_init(void)
+int tracker_init(void)
 {
 	st.path = "/proc/stat";
 	st.cpu_num = (size_t)get_nprocs_conf() + 1;
@@ -377,7 +377,7 @@ err_malloc:
 	return -1;
 }
 
-void cpu_monitor_exit(void)
+void tracker_exit(void)
 {
 	st.path = NULL;
 	st.cpu_num = 0;
