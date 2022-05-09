@@ -144,7 +144,7 @@ int main(void)
 
 	err = cpu_monitor_init();
 	if (err) {
-		err = EXIT_FAILURE;
+		ret = EXIT_FAILURE;
 		goto exit;
 	}
 
