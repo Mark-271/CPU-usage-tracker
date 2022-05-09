@@ -1,6 +1,7 @@
 APP	:= ptrack
+CSTD	?= -std=gnu99
 CPPFLAGS := -Iinclude -MD
-CFLAGS	:= -Wall -Wextra -O2 -pthread
+CFLAGS	:= -Wall -Wextra -O2 -pthread $(CSTD)
 LDLIBS	:= -pthread
 OBJS	:=			\
 	  src/main.o		\
