@@ -22,6 +22,7 @@
 void msleep(unsigned long msec)
 {
 	int r;
+
 	errno = 0;
 	struct timespec wait = {
 		.tv_sec = msec / 1000,

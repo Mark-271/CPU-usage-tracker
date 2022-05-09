@@ -20,7 +20,7 @@
 static pthread_mutex_t lock;
 
 /* CPU core usage data */
-struct  core_stat {
+struct core_stat {
 	char name[5];
 	unsigned long long user;
 	unsigned long long nice;
@@ -175,8 +175,8 @@ int cpu_monitor_read_data(void)
 	int err = -1;
 
 	if (!file_exist(st.path)) {
-			printf("Error: Incorrect path to file\n");
-			return err;
+		printf("Error: Incorrect path to file\n");
+		return err;
 	}
 
 	f = fopen(st.path, "r");
@@ -222,9 +222,8 @@ int cpu_monitor_init(void)
 
 	st.cs = (struct core_stat *)malloc(st.cpu_num *
 					   sizeof(struct core_stat));
-	if (!st.cs) {
+	if (!st.cs)
 		goto err_malloc;
-	}
 
 	st.prev = (struct cpu_usage *)malloc(st.cpu_num *
 					     sizeof(struct cpu_usage));

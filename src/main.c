@@ -17,7 +17,6 @@
 typedef void *(*thread_func_t) (void *);
 
 #define THR_NUM		3
-#define EXIT_SIGNAL	128 /* terminated by signal */
 
 static pthread_t thr_ids[THR_NUM];
 static pthread_cond_t cond_ids[THR_NUM - 1];
@@ -106,7 +105,7 @@ static void *thread_printer_func(void *data)
 
 static void destroy_cond(void)
 {
-	for(size_t i = 0; i < THR_NUM - 1; ++i)
+	for (size_t i = 0; i < THR_NUM - 1; ++i)
 		pthread_cond_destroy(&cond_ids[i]);
 	pthread_mutex_destroy(&condlock);
 }
