@@ -314,7 +314,7 @@ void *tracker_read(void *data)
 		err = tracker_read_data();
 		if (err) {
 			printf("Error: thread_reader error\n");
-			break;
+			exit(EXIT_FAILURE);
 		}
 		pthread_cond_signal(&st.cond_calc);
 
