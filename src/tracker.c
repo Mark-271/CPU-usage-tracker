@@ -115,7 +115,6 @@ static void tracker_analyze_data(void)
 	static size_t counter;
 
 	if (st.analyze_ready) {
-
 		pthread_mutex_lock(&st.lock);
 		st.analyze_ready = false;
 		pthread_mutex_unlock(&st.lock);
@@ -146,7 +145,6 @@ static void tracker_analyze_data(void)
 static void tracker_print_res(void)
 {
 	if (st.print_ready) {
-
 		pthread_mutex_lock(&st.lock);
 		st.print_ready = false;
 		pthread_mutex_unlock(&st.lock);
@@ -306,6 +304,7 @@ void *tracker_read(void *data)
 
 	for (;;) {
 		int err;
+
 		if (st.thr_cancel) {
 			pthread_cond_signal(&st.cond_calc);
 			break;
