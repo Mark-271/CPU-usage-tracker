@@ -189,15 +189,21 @@ static int tracker_read_data(void)
 	}
 
 	for (size_t i = 0; i < st.cpu_num; i++) {
+		int n;
+
 		if (getline(&line, &len, f) < 0)
 			goto err_getline;
 
 		pthread_mutex_lock(&st.lock);
-		sscanf(line, "%5s %llu %llu %llu %llu %llu %llu %llu %llu",
-			     st.cs[i].name, &st.cs[i].user, &st.cs[i].nice,
-			     &st.cs[i].system, &st.cs[i].idle, &st.cs[i].iowait,
-			     &st.cs[i].irq, &st.cs[i].softirq, &st.cs[i].steal);
+		n = sscanf(line, "%5s %llu %llu %llu %llu %llu %llu %llu %llu",
+		       st.cs[i].name, &st.cs[i].user, &st.cs[i].nice,
+		       &st.cs[i].system, &st.cs[i].idle, &st.cs[i].iowait,
+		       &st.cs[i].irq, &st.cs[i].softirq, &st.cs[i].steal);
 		pthread_mutex_unlock(&st.lock);
+		if (n < 9 || n == EOF) {
+			printf("Error: sscanf failed: %d\n", n);
+			goto err_sscanf;
+		}
 	}
 
 	free(line);
@@ -211,6 +217,7 @@ static int tracker_read_data(void)
 
 err_getline:
 	perror("getline error\n");
+err_sscanf:
 	free(line);
 	fclose(f);
 	return err;
