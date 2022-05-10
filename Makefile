@@ -25,6 +25,9 @@ else
   Q =
 endif
 
+CPPCHECK	= cppcheck
+CHECKFLAGS	= -q --std=c89 --enable=all --suppress=missingIncludeSystem
+
 all: $(APP)
 
 $(APP): $(OBJS)
@@ -35,12 +38,15 @@ $(APP): $(OBJS)
 	@printf "  CC    $(*).c\n"
 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $< -c -o $@
 
+cppcheck:
+	$(Q)$(CPPCHECK) $(CHECKFLAGS) src/*.c
+
 clean:
 	@printf "  CLEAN\n"
 	$(Q)-rm -f $(APP)
 	$(Q)-rm -f $(OBJS)
 	$(Q)find src/ -name '*.d' -exec rm -f {} \;
 
-.PHONY: all clean
+.PHONY: all clean cppcheck
 
 -include $(OBJS:.o=.d)
