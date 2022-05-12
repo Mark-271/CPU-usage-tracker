@@ -22,12 +22,11 @@
 void msleep(unsigned long msec)
 {
 	int r;
+	struct timespec wait;
 
 	errno = 0;
-	struct timespec wait = {
-		.tv_sec = msec / 1000,
-		.tv_nsec = (msec % 1000) * 1e6,
-	};
+	wait.tv_sec = msec / 1000;
+	wait.tv_nsec = (msec % 1000) * 1e6;
 
 	EINTR_LOOP(r, nanosleep(&wait, NULL));
 }

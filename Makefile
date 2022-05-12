@@ -1,12 +1,12 @@
-APP	:= ptrack
-CSTD	?= -std=gnu99
-CPPFLAGS := -Iinclude -MD
-CFLAGS	:= -Wall -Wextra -O2 -pthread $(CSTD)
-LDLIBS	:= -pthread
-OBJS	:=			\
-	  src/main.o		\
-	  src/tools.o		\
-	  src/tracker.o
+APP		:= ptrack
+CSTD		?= -std=gnu99
+CPPFLAGS 	:= -Iinclude -MD
+CFLAGS		:= -Wall -Wextra -O2 -pthread $(CSTD)
+LDLIBS		:= -pthread
+OBJS		:=			\
+		  src/main.o		\
+		  src/tools.o		\
+		  src/tracker.o
 
 SCRIPT_DIR	= scripts
 
