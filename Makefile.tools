@@ -1,0 +1,40 @@
+# Static code analysis tools options
+CHECKFLAGS	= -q --std=c89 --enable=all --suppress=missingIncludeSystem
+STYLECHECK	= checkpatch.pl
+STYLECHECKFLAGS	:= -f --terse --mailback
+STYLECHECKFILES	:= $(shell find src/ include/ -name '*.[ch]')
+SPARSEFLAGS	= -Wsparse-all $(CPPFLAGS)
+
+check: cppcheck check_sparse stylecheck scan_build
+
+cppcheck:
+	@echo "---> Checking with cppcheck..."
+	$(Q)cppcheck $(CHECKFLAGS) src/*.c
+
+check_sparse:
+	@echo "---> Checking with sparse..."
+	$(Q)find src include -type f -name "*.[ch]" \
+		-exec sparse $(SPARSEFLAGS) {} \;
+
+scan_build:
+	@echo "---> Checking with scan-build..."
+	$(Q)scan-build make -j4
+
+stylecheck: $(STYLECHECKFILES:=.stylecheck)
+
+# the cat is due to multithreaded nature - we like to have consistent chunks of
+# text on the output
+%.stylecheck: %
+	$(Q)echo "---> Checking with checkpatch.pl $(*)..."
+	$(Q)$(SCRIPT_DIR)/$(STYLECHECK) $(STYLECHECKFLAGS) $* > $*.stylecheck; \
+		if [ -s $*.stylecheck ]; then	\
+			cat $*.stylecheck;	\
+		else				\
+			rm -f $*.stylecheck;	\
+		fi;
+
+styleclean:
+	$(Q)find . -type f -name '*.stylecheck' -delete
+	$(Q)find . -type f -name '*.checkpatch-*' -delete
+
+.PHONY: check cppcheck check_sparse stylecheck styleclean scan_build
